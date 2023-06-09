@@ -15,6 +15,24 @@
  *
  * Check the `patchElement` function in '../../runtime-core/src/renderer.ts' to see how the
  * flags are handled during diff.
+ * PatchFlags 是一个枚举对象，用于表示虚拟节点（vnode）的不同修补标志。
+
+以下是 PatchFlags 中定义的各个标志及其含义：
+
+TEXT：表示具有动态文本内容的元素（快速处理子节点的路径）。
+CLASS：表示具有动态类绑定的元素。
+STYLE：表示具有动态样式的元素。编译器会将静态字符串样式预编译为静态对象，并检测并提升内联的静态对象。
+PROPS：表示具有非类和样式动态属性的元素。也可以用于具有任何动态属性的组件（包括类和样式）。当此标志存在时，vnode 还具有一个 dynamicProps 数组，其中包含可能会更改的属性的键，以便运行时可以更快地进行差异化比较。
+FULL_PROPS：表示具有动态键的属性的元素。当键发生变化时，始终需要进行完整的差异化比较。此标志与 CLASS、STYLE 和 PROPS 互斥。
+HYDRATE_EVENTS：表示具有事件侦听器的元素（需要在水合过程中附加）。
+STABLE_FRAGMENT：表示子节点顺序不会改变的片段。
+KEYED_FRAGMENT：表示具有键控或部分键控子节点的片段。
+UNKEYED_FRAGMENT：表示具有无键控子节点的片段。
+NEED_PATCH：表示仅需要对非属性进行修补的元素，例如引用（ref）或指令（onVnodeXXX 钩子）。因为每个修补的 vnode 都会检查引用和 onVnodeXXX 钩子，它只是标记 vnode，以便父块可以跟踪它。
+DYNAMIC_SLOTS：表示具有动态插槽的组件（例如引用 v-for 迭代值的插槽或动态插槽名称）。具有此标志的组件始终会强制更新。
+DEV_ROOT_FRAGMENT：表示仅因为用户在模板的根级别放置了注释而创建的片段。这仅用于开发环境，因为在生产环境中会剥离注释。
+HOISTED：表示一个被提升的静态 vnode。这是水合过程的提示，可以跳过整个子树，因为静态内容永远不需要更新。
+BAIL：表示差异化算法应该退出优化模式的特殊标志。例如，在由 renderSlot() 创建的块片段中遇到非编译器生成的插槽时（即手动编写的渲染函数，应始终完全进行差异化比较），或
  */
 export const enum PatchFlags {
   /**
