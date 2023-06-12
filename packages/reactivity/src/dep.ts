@@ -6,6 +6,10 @@ export type Dep = Set<ReactiveEffect> & TrackedMarkers
  * wasTracked and newTracked maintain the status for several levels of effect
  * tracking recursion. One bit per level is used to define whether the dependency
  * was/is tracked.
+ * TrackedMarkers是一个类型别名，它表示一个对象类型，其中包含两个属性：w和n。
+
+w属性是一个number类型，用于表示"wasTracked"（曾经被追踪）的数量。
+n属性也是一个number类型，用于表示"newTracked"（新追踪）的数量。
  */
 type TrackedMarkers = {
   /**
