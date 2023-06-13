@@ -52,6 +52,9 @@ export const Fragment = Symbol.for('v-fgt') as any as {
     $props: VNodeProps
   }
 }
+/**
+ * 定义了一个名为Text的常量变量。Text变量的值是使用Symbol.for()方法生成的，该方法创建了一个描述为'v-txt'的符号(Symbol)。符号是唯一且不可变的值，可用作对象属性的键。通过使用Symbol.for()，确保该符号在全局符号注册表中注册，可以从代码的不同部分访问它。
+ */
 export const Text = Symbol.for('v-txt')
 export const Comment = Symbol.for('v-cmt')
 export const Static = Symbol.for('v-stc')
