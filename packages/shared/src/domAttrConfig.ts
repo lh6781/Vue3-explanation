@@ -27,6 +27,16 @@ export const isBooleanAttr = /*#__PURE__*/ makeMap(
 /**
  * Boolean attributes should be included if the value is truthy or ''.
  * e.g. `<select multiple>` compiles to `{ multiple: '' }`
+ * 这段代码定义了一个名为includeBooleanAttr的函数，用于判断一个值是否应当包含在布尔属性中。
+
+函数接受一个参数value，表示要判断的值。
+
+函数的逻辑如下：
+
+首先，使用双重否定运算符!!对value进行转换。这将把value转换为布尔值，类似于使用Boolean(value)进行转换。
+接着，进行条件判断，判断转换后的布尔值是否为true。
+如果转换后的布尔值为true，或者value的值为空字符串''，则返回true，表示应当包含该值在布尔属性中。
+如果转换后的布尔值为false，且value的值不为空字符串，则返回false，表示不应当包含该值在布尔属性中。
  */
 export function includeBooleanAttr(value: unknown): boolean {
   return !!value || value === ''
@@ -34,7 +44,22 @@ export function includeBooleanAttr(value: unknown): boolean {
 
 const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/
 const attrValidationCache: Record<string, boolean> = {}
+/**
+ * 
+ * 这段代码定义了一个名为isSSRSafeAttrName的函数，用于判断给定的属性名是否是安全的用于服务器端渲染 (SSR) 的。
 
+函数接受一个参数name，表示要判断的属性名。
+
+函数的逻辑如下：
+
+首先，通过attrValidationCache.hasOwnProperty(name)判断给定的属性名是否已经存在于attrValidationCache对象中。attrValidationCache是一个缓存对象，用于存储属性名的验证结果。
+如果属性名已经存在于缓存中，则直接返回缓存中对应的验证结果，避免重复的验证过程。
+如果属性名不在缓存中，继续执行后续的验证逻辑。
+使用正则表达式unsafeAttrCharRE.test(name)对属性名进行验证，判断是否包含不安全的字符。
+如果属性名包含不安全的字符，则在控制台输出错误信息，指示属性名不安全。
+将属性名的验证结果存储到attrValidationCache对象中，以便下次验证时可以直接使用缓存结果。
+返回属性名是否安全的布尔值，通过取非操作符!来得到结果。如果属性名不包含不安全字符，则返回true，否则返回false。
+ */
 export function isSSRSafeAttrName(name: string): boolean {
   if (attrValidationCache.hasOwnProperty(name)) {
     return attrValidationCache[name]
