@@ -2,8 +2,23 @@ import { isArray } from '@vue/shared'
 import { VNode } from '../vnode'
 
 // #6651 res can be undefined in SSR in string push mode
-type SSRSlot = (...args: any[]) => VNode[] | undefined
+/**
+ * `SSRSlot` 是一个函数类型，用于表示服务端渲染时的插槽。它接收任意数量的参数，并返回一个 `VNode[]` 数组或 `undefined`。
 
+在服务端渲染过程中，插槽可以是动态的，因此需要使用函数来表示插槽内容。`SSRSlot` 就是这样的函数类型，它可以接收参数并返回插槽内容的 `VNode` 数组。
+
+插槽的具体内容和参数根据具体的使用场景而定，可以根据需要来定义和实现 `SSRSlot` 函数类型的具体逻辑。
+ */
+type SSRSlot = (...args: any[]) => VNode[] | undefined
+/**
+ * `CompiledSlotDescriptor` 是一个接口，用于描述编译后的插槽信息。它具有以下属性：
+
+- `name: string`：插槽的名称。它表示插槽在组件中的标识符。
+- `fn: SSRSlot`：一个函数，用于渲染插槽内容。该函数接收任意数量的参数，并返回一个 `VNode` 数组或 `undefined`。
+- `key?: string`：可选属性，表示插槽的键值。它用于在列表渲染时跟踪插槽的身份。
+
+`CompiledSlotDescriptor` 的主要作用是在组件编译阶段收集和存储插槽的相关信息，以便在组件的渲染过程中正确地调用和渲染插槽内容。通过 `name` 和 `fn` 属性，可以获取插槽的名称和渲染函数，并在适当的时机使用它们来生成插槽的 `VNode` 数组。可选的 `key` 属性可用于区分具有相同名称的不同插槽。
+ */
 interface CompiledSlotDescriptor {
   name: string
   fn: SSRSlot
@@ -13,6 +28,14 @@ interface CompiledSlotDescriptor {
 /**
  * Compiler runtime helper for creating dynamic slots object
  * @private
+ * `createSlots` 是一个函数，用于创建插槽对象。它接收两个参数：
+
+- `slots: Record<string, SSRSlot>`：一个包含静态插槽的对象，其中每个插槽由名称和对应的渲染函数（`SSRSlot`）组成。
+- `dynamicSlots: (CompiledSlotDescriptor | CompiledSlotDescriptor[] | undefined)[]`：一个包含动态插槽信息的数组。每个动态插槽可以是单个 `CompiledSlotDescriptor` 对象或 `CompiledSlotDescriptor` 对象的数组，或者是 `undefined`。
+
+函数会遍历 `dynamicSlots` 数组，将动态插槽信息合并到 `slots` 对象中。如果动态插槽是一个数组，则将其中的每个 `CompiledSlotDescriptor` 对象的名称和渲染函数添加到 `slots` 对象中。如果动态插槽是单个 `CompiledSlotDescriptor` 对象，则将其名称和渲染函数添加到 `slots` 对象中。如果 `CompiledSlotDescriptor` 对象具有 `key` 属性，则会为渲染函数创建一个新的函数，该函数在调用原始渲染函数后会为返回的 `VNode` 设置 `key`。
+
+最后，函数返回更新后的 `slots` 对象，包含了静态插槽和动态插槽的信息。这个对象可以在组件的渲染过程中用于调用和渲染相应的插槽内容。
  */
 export function createSlots(
   slots: Record<string, SSRSlot>,
