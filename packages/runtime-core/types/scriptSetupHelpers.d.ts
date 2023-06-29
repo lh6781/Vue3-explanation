@@ -1,5 +1,8 @@
 // Note: this file is auto concatenated to the end of the bundled d.ts during
 // build.
+/**
+ * 这行代码声明了一个类型别名 _defineProps，它的类型是 defineProps 的类型。defineProps 是一个全局变量或函数，它的类型将被赋值给 _defineProps。
+ */
 type _defineProps = typeof defineProps
 type _defineEmits = typeof defineEmits
 type _defineExpose = typeof defineExpose

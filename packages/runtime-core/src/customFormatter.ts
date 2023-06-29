@@ -3,7 +3,43 @@ import { EMPTY_OBJ, extend, isArray, isFunction, isObject } from '@vue/shared'
 import { isShallow } from '../../reactivity/src/reactive'
 import { ComponentInternalInstance, ComponentOptions } from './component'
 import { ComponentPublicInstance } from './componentPublicInstance'
+/**
+ * 
+ * @returns 
+ * `initCustomFormatter` 函数用于初始化自定义的 DevTools 格式化程序，用于在浏览器的开发者工具中格式化 Vue 实例对象。
 
+首先，检查当前环境是否处于开发模式 (`__DEV__`) 并且是否在浏览器中运行。如果不满足条件，则直接返回，不进行初始化。
+
+接下来，定义了一些样式对象，用于在 DevTools 中显示不同类型的数据。
+
+然后，定义了一个 `formatter` 对象，包含了自定义的格式化方法。这些方法用于根据对象的类型和属性来生成对应的格式化内容。主要包括以下方法：
+
+- `header(obj: unknown)`: 根据对象生成格式化的标题部分。
+- `hasBody(obj: unknown)`: 判断对象是否有展开的内容。
+- `body(obj: unknown)`: 根据对象生成格式化的展开内容部分。
+
+在 `header` 方法中，根据对象的类型进行判断，并返回对应的格式化标题内容。其中，判断对象是否为 Vue 实例，是否为响应式对象等。
+
+在 `hasBody` 方法中，判断对象是否为 Vue 实例，并返回相应的结果。
+
+在 `body` 方法中，根据对象是否为 Vue 实例，生成相应的格式化内容。
+
+接下来，定义了 `formatInstance` 方法，用于生成 Vue 实例的格式化内容。根据实例的不同属性（props、setupState、data、computed、injected），生成相应的展示块。
+
+然后，定义了 `createInstanceBlock` 方法，用于生成每个属性的展示块。根据属性名和属性值生成相应的格式化内容。
+
+接着，定义了 `formatValue` 方法，用于根据值的类型生成相应的格式化内容。
+
+接下来，定义了 `extractKeys` 方法，用于从实例的 `ctx` 中提取指定类型的属性。遍历实例的 `ctx`，判断属性是否属于指定类型，如果是则将属性和值存储到一个新的对象中并返回。
+
+然后，定义了 `isKeyOfType` 方法，用于判断属性是否属于指定类型。根据组件的选项对象以及继承的组件和混入的组件判断属性是否存在于指定类型中。
+
+接下来，定义了 `genRefFlag` 方法，根据 `Ref` 对象的类型生成标识字符串。
+
+最后，在符合条件的情况下，将自定义的格式化程序对象 `formatter` 推入 `window.devtoolsFormatters` 数组中，将其注册为 DevTools 的自定义格式化程序。
+
+通过调用 `initCustomFormatter` 函数，可以在浏览器的开发者工具中更好地查看和调试 Vue 实例对象的属性和状态。
+ */
 export function initCustomFormatter() {
   /* eslint-disable no-restricted-globals */
   if (!__DEV__ || typeof window === 'undefined') {

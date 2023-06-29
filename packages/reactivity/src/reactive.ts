@@ -599,6 +599,21 @@ export function isShallow(value: unknown): boolean {
  *
  * @param value - The value to check.
  * @see {@link https://vuejs.org/api/reactivity-utilities.html#isproxy}
+ * isProxy 函数用于判断一个值是否为代理对象（响应式或只读）。
+
+函数的逻辑如下：
+
+首先，调用 isReactive 函数判断值是否为响应式对象。
+
+如果值是响应式对象，则返回 true，表示该值是一个代理对象。
+
+如果值不是响应式对象，则调用 isReadonly 函数判断值是否为只读对象。
+
+如果值是只读对象，则返回 true，表示该值是一个代理对象。
+
+如果值既不是响应式对象也不是只读对象，则返回 false，表示该值不是一个代理对象。
+
+通过调用 isProxy 函数，可以判断一个值是否为代理对象（响应式或只读）。
  */
 export function isProxy(value: unknown): boolean {
   return isReactive(value) || isReadonly(value)
@@ -626,12 +641,31 @@ export function isProxy(value: unknown): boolean {
  *
  * @param observed - The object for which the "raw" value is requested.
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#toraw}
+ * toRaw 函数用于获取一个代理对象的原始（非代理）对象。
+
+函数的逻辑如下：
+
+首先，判断传入的 observed 值是否存在，如果不存在，则直接返回该值。
+
+接着，尝试获取 observed 对象的原始对象，通过访问 observed[ReactiveFlags.RAW] 属性来获取。
+
+如果存在原始对象，则递归调用 toRaw 函数，将原始对象作为参数传入，继续获取更深层次的原始对象，直到没有代理对象为止。
+
+如果不存在原始对象，则说明 observed 不是一个代理对象，直接返回 observed。
+
+通过调用 toRaw 函数，可以获取代理对象的原始（非代理）对象。这在某些情况下非常有用，例如需要将代理对象传递给不支持代理的函数或库时，可以先通过 toRaw 函数获取原始对象。
  */
 export function toRaw<T>(observed: T): T {
   const raw = observed && (observed as Target)[ReactiveFlags.RAW]
   return raw ? toRaw(raw) : observed
 }
+/**
+ * Raw<T> 是一个类型别名，用于将泛型类型 T 添加一个属性 [RawSymbol]，并赋值为 true。它表示一个原始对象的类型。
 
+在这里，RawSymbol 是一个唯一的 symbol 值，用作属性键。通过将 Raw<T> 应用到一个类型上，可以将该类型标记为原始对象类型。
+
+这个类型别名可以用于在一些特定情况下，明确标记一个对象为原始对象。例如，当我们需要确保某个对象不被视为代理对象时，可以将其类型声明为 Raw<T>，这样其他地方就可以知道它是一个原始对象。
+ */
 export type Raw<T> = T & { [RawSymbol]?: true }
 
 /**
@@ -655,6 +689,13 @@ export type Raw<T> = T & { [RawSymbol]?: true }
  *
  * @param value - The object to be marked as "raw".
  * @see {@link https://vuejs.org/api/reactivity-advanced.html#markraw}
+ * markRaw 是一个函数，用于将一个对象标记为原始对象。它接受一个泛型参数 T，表示要标记为原始对象的对象的类型，并返回一个标记后的原始对象。
+
+在函数内部，通过调用 def 函数，给对象添加一个属性 [ReactiveFlags.SKIP]，并将其值设为 true，从而标记该对象为原始对象。
+
+标记一个对象为原始对象意味着该对象不会被响应式系统转换成代理对象。响应式系统会忽略对标记为原始对象的属性的响应式追踪和代理操作。
+
+通过 markRaw 函数标记的对象可以用于特定场景，例如避免某些对象被观测或代理，提高性能或避免不必要的响应式追踪。
  */
 export function markRaw<T extends object>(value: T): Raw<T> {
   def(value, ReactiveFlags.SKIP, true)
@@ -667,6 +708,13 @@ export function markRaw<T extends object>(value: T): Raw<T> {
  * If the given value is not an object, the original value itself is returned.
  *
  * @param value - The value for which a reactive proxy shall be created.
+ * toReactive 是一个泛型函数，用于将一个值转换为响应式对象。它接受一个泛型参数 T，表示要转换的值的类型，并返回转换后的响应式对象。
+
+在函数内部，通过调用 reactive 函数，将值转换为响应式对象。如果值是一个对象类型（非 null、非数组、非函数等），则会被转换为响应式对象；否则，保持原样返回。
+
+该函数的作用是方便地将一个值转换为响应式对象，以便在需要时对其进行响应式追踪和代理操作。如果值本身已经是响应式对象，则会直接返回，避免重复转换。
+
+请注意，在转换之前，确保已经初始化了响应式系统，以便正确处理响应式对象的创建和追踪。
  */
 export const toReactive = <T extends unknown>(value: T): T =>
   isObject(value) ? reactive(value) : value
@@ -677,6 +725,13 @@ export const toReactive = <T extends unknown>(value: T): T =>
  * If the given value is not an object, the original value itself is returned.
  *
  * @param value - The value for which a readonly proxy shall be created.
+ * toReadonly 是一个泛型函数，用于将一个值转换为只读对象。它接受一个泛型参数 T，表示要转换的值的类型，并返回转换后的只读对象。
+
+在函数内部，通过调用 readonly 函数，将值转换为只读对象。如果值是一个对象类型（非 null、非数组、非函数等），则会被转换为只读对象；否则，保持原样返回。
+
+该函数的作用是方便地将一个值转换为只读对象，以便在需要时对其进行只读访问和保护。只读对象不允许进行修改操作，以确保数据的不可变性和安全性。
+
+请注意，在转换之前，确保已经初始化了响应式系统，以便正确处理只读对象的创建和访问。
  */
 export const toReadonly = <T extends unknown>(value: T): T =>
   isObject(value) ? readonly(value) : value

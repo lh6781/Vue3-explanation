@@ -24,23 +24,72 @@ import {
 } from './components/Suspense'
 import { TeleportImpl, TeleportVNode } from './components/Teleport'
 import { isAsyncWrapper } from './apiAsyncComponent'
+/**
+ * `RootHydrateFunction` 是一个类型别名，表示根据虚拟节点 `vnode` 将内容渲染到容器 `container` 中的函数。
 
+函数接受两个参数：
+- `vnode: VNode<Node, Element>`：要渲染的虚拟节点。
+- `container: (Element | ShadowRoot) & { _vnode?: VNode }`：要将内容渲染到的容器，可以是普通的 DOM 元素或 Shadow DOM 的根节点。容器还可以包含一个名为 `_vnode` 的属性，用于存储与容器相关联的虚拟节点。
+
+函数的作用是将虚拟节点 `vnode` 渲染到容器 `container` 中。具体的渲染方式取决于实际的渲染引擎或框架。
+
+通过使用 `RootHydrateFunction` 类型别名，可以在类型注解或类型声明中明确函数的参数和返回值类型，以提高代码的可读性和可维护性。
+ */
 export type RootHydrateFunction = (
   vnode: VNode<Node, Element>,
   container: (Element | ShadowRoot) & { _vnode?: VNode }
 ) => void
+/**
+ * `const enum DOMNodeTypes` 是一个常量枚举，用于表示 DOM 节点的类型。
 
+它定义了以下三个枚举成员：
+- `ELEMENT`：表示 DOM 元素节点的类型值为 1。
+- `TEXT`：表示 DOM 文本节点的类型值为 3。
+- `COMMENT`：表示 DOM 注释节点的类型值为 8。
+
+使用常量枚举可以在代码中使用更加可读性强的符号来表示不同的 DOM 节点类型，而不需要硬编码对应的类型值。例如，可以使用 `DOMNodeTypes.ELEMENT` 来表示元素节点的类型，而不是直接使用数字 1。
+
+常量枚举在编译时会被内联，而不会生成额外的 JavaScript 代码。这意味着在运行时，`DOMNodeTypes.ELEMENT`、`DOMNodeTypes.TEXT` 和 `DOMNodeTypes.COMMENT` 实际上会被替换为对应的类型值。这可以提高代码的性能和可维护性。
+ */
 const enum DOMNodeTypes {
   ELEMENT = 1,
   TEXT = 3,
   COMMENT = 8
 }
+/**
+ * `hasMismatch` 是一个布尔类型的变量，用于表示是否存在不匹配的情况。
 
+在代码中，`hasMismatch` 的初始值为 `false`，表示不存在不匹配的情况。根据代码的上下文，`hasMismatch` 可能会在某些条件满足时被修改为 `true`，以指示存在不匹配的情况。
+
+具体的修改逻辑需要查看代码中的其他部分来确定。在给定的代码片段中，`hasMismatch` 的初始值为 `false`，但没有展示出它是如何被修改的。
+ */
 let hasMismatch = false
+/**
+ * 
+ * @param container 】
+ * @returns 
+ * `isSVGContainer` 是一个函数，用于判断给定的 `container` 是否是 SVG 容器。
 
+函数接受一个参数 `container`，它应该是一个 DOM 元素。函数通过检查 `container` 的命名空间 URI 和标签名来确定是否是 SVG 容器。
+
+具体来说，函数首先使用正则表达式 `/svg/` 来测试 `container` 的命名空间 URI 是否包含 "svg" 字符串。如果命名空间 URI 中包含 "svg" 字符串，表示该容器是 SVG 容器。
+
+另外，函数还会检查 `container` 的标签名是否为 "foreignObject"。如果标签名不是 "foreignObject"，则认为该容器是 SVG 容器。
+
+如果 `container` 是 SVG 容器，函数会返回 `true`，否则返回 `false`。
+ */
 const isSVGContainer = (container: Element) =>
   /svg/.test(container.namespaceURI!) && container.tagName !== 'foreignObject'
+/**
+ * 
+ * @param node 
+ * @returns 
+ * `isComment` 是一个函数，用于判断给定的 `node` 是否是注释节点（Comment Node）。
 
+函数接受一个参数 `node`，它应该是一个 DOM 节点。函数通过检查 `node` 的 `nodeType` 属性是否等于 `DOMNodeTypes.COMMENT` 来确定是否是注释节点。
+
+如果 `node` 是注释节点，函数会返回 `true`，否则返回 `false`。
+ */
 const isComment = (node: Node): node is Comment =>
   node.nodeType === DOMNodeTypes.COMMENT
 
@@ -49,6 +98,26 @@ const isComment = (node: Node): node is Comment =>
 // it out creates a ton of unnecessary complexity.
 // Hydration also depends on some renderer internal logic which needs to be
 // passed in via arguments.
+/**
+ * 
+ * @param rendererInternals 
+ * @returns 
+ * `createHydrationFunctions` 函数是一个用于创建 SSR（服务器端渲染）的元素注水（hydration）相关函数的导出函数。注水是将服务器渲染的 HTML 内容与客户端的虚拟 DOM 进行匹配和同步的过程。
+
+在这个函数中，首先从传入的 `rendererInternals` 对象中获取所需的渲染函数和操作函数。然后定义了一个名为 `hydrate` 的函数，用于执行注水操作。`hydrate` 函数会检查容器元素是否有子节点，如果没有子节点，则会执行完整的挂载操作；否则，会通过调用 `hydrateNode` 函数来进行节点的匹配和同步。
+
+`hydrateNode` 函数是核心的注水函数，它根据节点类型的不同执行相应的匹配和同步操作。根据节点的类型，可以分为文本节点、注释节点、静态节点、片段节点、元素节点、组件节点、传送门节点和异步组件节点等。
+
+函数的逻辑主要包括以下几个步骤：
+1. 根据节点类型执行相应的匹配和同步操作。
+2. 检查是否需要更新节点的属性。
+3. 执行节点的钩子函数。
+4. 处理节点的子节点。
+
+最后，根据匹配结果和执行过程中的错误情况，可能会输出一些警告信息。
+
+总之，`createHydrationFunctions` 函数用于创建在服务器端渲染的 HTML 内容和客户端的虚拟 DOM 之间进行注水操作的函数，以确保两者保持一致性。
+ */
 export function createHydrationFunctions(
   rendererInternals: RendererInternals<Node, Element>
 ) {

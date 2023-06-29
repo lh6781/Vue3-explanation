@@ -72,22 +72,69 @@ import { initFeatureFlags } from './featureFlags'
 import { isAsyncWrapper } from './apiAsyncComponent'
 import { isCompatEnabled } from './compat/compatConfig'
 import { DeprecationTypes } from './compat/compatConfig'
+/**
+ * 这段代码定义了一个名为 `Renderer` 的接口（interface），该接口具有以下属性：
 
+1. `render: RootRenderFunction<HostElement>`：这是一个函数属性，表示渲染函数。它接受一个名为 `HostElement` 的泛型参数，并返回一个根渲染函数（`RootRenderFunction`）。根渲染函数用于将应用程序渲染到指定的宿主元素上。
+
+2. `createApp: CreateAppFunction<HostElement>`：这是一个函数属性，表示创建应用程序的函数。它接受一个名为 `HostElement` 的泛型参数，并返回一个创建应用程序的函数（`CreateAppFunction`）。创建应用程序的函数用于创建一个应用程序实例，并返回该实例供进一步操作。
+
+这个接口的作用是定义一个通用的渲染器（Renderer）接口，用于支持不同类型的宿主环境和渲染方式。具体的渲染器实现需要实现这个接口，并提供 `render` 和 `createApp` 方法的具体实现，以适应不同的宿主环境和应用程序需求。
+ */
 export interface Renderer<HostElement = RendererElement> {
   render: RootRenderFunction<HostElement>
   createApp: CreateAppFunction<HostElement>
 }
+/**
+ * 这段代码定义了一个名为 `HydrationRenderer` 的接口，它继承自 `Renderer<Element | ShadowRoot>` 接口，并添加了一个额外的属性：
 
+1. `hydrate: RootHydrateFunction`：这是一个函数属性，表示水合（hydration）函数。它是一个根水合函数（`RootHydrateFunction`），用于在服务器端渲染（SSR）中将已有的 HTML 标记和客户端生成的虚拟 DOM 进行比对，并进行水合操作，以恢复客户端上的状态和事件监听。
+
+通过继承 `Renderer<Element | ShadowRoot>` 接口，`HydrationRenderer` 接口继承了 `Renderer` 接口中定义的 `render` 和 `createApp` 方法，同时添加了 `hydrate` 方法，以支持服务器端渲染时的水合操作。
+
+这个接口的作用是为支持服务器端渲染的渲染器定义一个专门的接口，用于提供水合功能，以便在服务器端渲染和客户端渲染之间实现状态和事件的传递和同步。
+ */
 export interface HydrationRenderer extends Renderer<Element | ShadowRoot> {
   hydrate: RootHydrateFunction
 }
+/**
+ * 这段代码定义了一个名为 `RootRenderFunction` 的类型别名，它是一个函数类型，接受以下参数：
 
+1. `vnode: VNode | null`：表示要渲染的虚拟节点（VNode），可以是一个有效的 VNode 对象或 `null`。
+2. `container: HostElement`：表示要将虚拟节点渲染到的容器元素（HostElement）。这个容器元素可以是浏览器中的 DOM 元素，也可以是 Shadow DOM 中的 ShadowRoot 元素。
+3. `isSVG?: boolean`：一个可选的布尔值参数，表示渲染的虚拟节点是否包含 SVG 元素。默认为 `undefined`。
+
+该函数没有返回值，它的作用是将虚拟节点渲染到指定的容器元素中。这个函数通常由渲染器实现，用于将虚拟节点转换为实际的 DOM 元素，并将其插入到容器元素中，完成渲染的过程。
+
+类型别名的泛型参数 `HostElement` 表示容器元素的类型，默认为 `RendererElement`，它是一个通用的渲染器元素类型。通过在泛型参数中指定具体的容器元素类型，可以在类型检查时提供更准确的类型信息。
+ */
 export type RootRenderFunction<HostElement = RendererElement> = (
   vnode: VNode | null,
   container: HostElement,
   isSVG?: boolean
 ) => void
+/**
+ * 这段代码定义了一个名为 `RendererOptions` 的接口，它描述了渲染器的选项和方法。接口的泛型参数 `HostNode` 和 `HostElement` 分别表示节点和元素的类型，默认为 `RendererNode` 和 `RendererElement`。
 
+接口中包含以下方法：
+
+- `patchProp`：用于更新元素的属性值。
+- `insert`：将节点插入到父节点中。
+- `remove`：从父节点中移除节点。
+- `createElement`：创建一个元素节点。
+- `createText`：创建一个文本节点。
+- `createComment`：创建一个注释节点。
+- `setText`：设置节点的文本内容。
+- `setElementText`：设置元素节点的文本内容。
+- `parentNode`：获取节点的父元素节点。
+- `nextSibling`：获取节点的下一个兄弟节点。
+- `querySelector`（可选）：根据选择器获取匹配的元素节点。
+- `setScopeId`（可选）：设置元素节点的作用域 ID。
+- `cloneNode`（可选）：克隆一个节点。
+- `insertStaticContent`（可选）：将静态内容插入到父节点中。
+
+这些方法用于在渲染器中操作和管理 DOM 节点，完成虚拟节点到实际 DOM 的转换和更新。不同的渲染器可以根据自身的特点和实现方式来实现这些方法。
+ */
 export interface RendererOptions<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -134,15 +181,46 @@ export interface RendererOptions<
 // logic - they are never directly operated on and always passed to the node op
 // functions provided via options, so the internal constraint is really just
 // a generic object.
+/**
+ * 这段代码定义了一个名为 `RendererNode` 的接口，它表示渲染器中的节点对象。该接口没有具体的属性和方法定义，只是使用索引签名 `[key: string]: any`，表示节点对象可以拥有任意类型的属性和方法。
+
+这种定义方式允许节点对象具有动态的属性和方法，可以根据具体的渲染器实现来进行扩展和定制。在渲染器中，节点对象通常用于表示虚拟节点（Virtual Node）或实际的 DOM 节点，可以通过索引访问和操作节点的属性和方法。具体的属性和方法定义可能取决于渲染器的实现和上下文环境。
+ */
 export interface RendererNode {
   [key: string]: any
 }
+/**
+ * 这段代码定义了一个名为 `RendererElement` 的接口，它扩展了 `RendererNode` 接口。通过这个扩展，`RendererElement` 继承了 `RendererNode` 中定义的任意属性和方法。
 
+在渲染器中，`RendererElement` 代表渲染器中的元素节点。它可以具有任意类型的属性和方法，根据具体的渲染器实现和上下文环境来决定。通过扩展 `RendererNode` 接口，`RendererElement` 继承了基本的节点功能，并可以在此基础上进行进一步扩展和定制。
+
+这种扩展关系使得可以将 `RendererElement` 对象用于表示实际的 DOM 元素节点，并通过索引访问和操作节点的属性和方法。具体的属性和方法定义将根据渲染器的实现和上下文环境而定。
+ */
 export interface RendererElement extends RendererNode {}
 
 // An object exposing the internals of a renderer, passed to tree-shakeable
 // features so that they can be decoupled from this file. Keys are shortened
 // to optimize bundle size.
+/**
+ * 这段代码定义了一个名为 `RendererInternals` 的接口，它包含了一系列用于渲染器内部操作的方法和属性。
+
+该接口有两个泛型参数：`HostNode` 和 `HostElement`，它们分别表示节点类型和元素类型。这些泛型参数可以根据具体的渲染器实现和上下文环境来确定。
+
+`RendererInternals` 接口包含以下成员：
+
+- `p: PatchFn`：表示修补函数，用于更新节点的属性。
+- `um: UnmountFn`：表示卸载函数，用于卸载节点。
+- `r: RemoveFn`：表示移除函数，用于移除节点。
+- `m: MoveFn`：表示移动函数，用于移动节点。
+- `mt: MountComponentFn`：表示组件挂载函数，用于挂载组件。
+- `mc: MountChildrenFn`：表示子节点挂载函数，用于挂载子节点。
+- `pc: PatchChildrenFn`：表示修补子节点函数，用于更新子节点。
+- `pbc: PatchBlockChildrenFn`：表示修补块子节点函数，用于更新块子节点。
+- `n: NextFn`：表示下一个函数，用于获取节点的下一个节点。
+- `o: RendererOptions<HostNode, HostElement>`：表示渲染器选项，包含了一系列用于操作节点的方法和属性。
+
+这些方法和属性用于内部的渲染器操作，实现了节点的创建、更新、卸载和移动等功能。具体的实现和用法将根据渲染器的具体实现和上下文环境而有所不同。
+ */
 export interface RendererInternals<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -162,6 +240,21 @@ export interface RendererInternals<
 // These functions are created inside a closure and therefore their types cannot
 // be directly exported. In order to avoid maintaining function signatures in
 // two places, we declare them once here and use them inside the closure.
+/**
+ * `PatchFn` 是一个函数类型，用于在渲染器中执行节点的修补操作。该函数接受多个参数，具体如下：
+
+- `n1: VNode | null`：表示旧的虚拟节点，如果为 `null`，则表示这是一次挂载操作。
+- `n2: VNode`：表示新的虚拟节点，要进行修补的目标。
+- `container: RendererElement`：表示要将节点插入的容器元素。
+- `anchor?: RendererNode | null`：表示插入节点的参考节点，新节点将插入到参考节点之前。如果没有指定参考节点，则为 `null`。
+- `parentComponent?: ComponentInternalInstance | null`：表示当前组件实例的父级组件实例，如果没有父级组件，则为 `null`。
+- `parentSuspense?: SuspenseBoundary | null`：表示当前悬挂区域（Suspense）的边界，如果没有悬挂区域，则为 `null`。
+- `isSVG?: boolean`：表示是否在 SVG 上下文中进行渲染，如果是，则为 `true`，否则为 `false`。
+- `slotScopeIds?: string[] | null`：表示插槽的作用域 ID 数组，用于处理作用域插槽。
+- `optimized?: boolean`：表示是否进行优化的标志，如果为 `true`，则表示该节点是经过优化的节点。
+
+`PatchFn` 函数负责根据新的虚拟节点 `n2` 进行修补操作，将节点插入到容器中，更新节点的属性，卸载不再需要的旧节点等。具体的修补逻辑将根据渲染器的实现而有所不同。
+ */
 type PatchFn = (
   n1: VNode | null, // null means this is a mount
   n2: VNode,
@@ -173,7 +266,21 @@ type PatchFn = (
   slotScopeIds?: string[] | null,
   optimized?: boolean
 ) => void
+/**
+ * `MountChildrenFn` 是一个函数类型，用于在渲染器中挂载子节点。该函数接受多个参数，具体如下：
 
+- `children: VNodeArrayChildren`：表示要挂载的子节点集合，可以是数组、对象或字符串。
+- `container: RendererElement`：表示要将子节点挂载到的容器元素。
+- `anchor: RendererNode | null`：表示插入子节点的参考节点，新的子节点将插入到参考节点之前。如果没有指定参考节点，则为 `null`。
+- `parentComponent: ComponentInternalInstance | null`：表示当前组件实例的父级组件实例，如果没有父级组件，则为 `null`。
+- `parentSuspense: SuspenseBoundary | null`：表示当前悬挂区域（Suspense）的边界，如果没有悬挂区域，则为 `null`。
+- `isSVG: boolean`：表示是否在 SVG 上下文中进行渲染，如果是，则为 `true`，否则为 `false`。
+- `slotScopeIds: string[] | null`：表示插槽的作用域 ID 数组，用于处理作用域插槽。
+- `optimized: boolean`：表示是否进行优化的标志，如果为 `true`，则表示子节点是经过优化的。
+- `start?: number`：表示子节点集合的起始索引，默认为 0。
+
+`MountChildrenFn` 函数负责将子节点挂载到指定的容器中，具体的挂载逻辑将根据渲染器的实现而有所不同。
+ */
 type MountChildrenFn = (
   children: VNodeArrayChildren,
   container: RendererElement,
@@ -185,7 +292,21 @@ type MountChildrenFn = (
   optimized: boolean,
   start?: number
 ) => void
+/**
+ * `PatchChildrenFn` 是一个函数类型，用于在渲染器中更新子节点。该函数接受多个参数，具体如下：
 
+- `n1: VNode | null`：表示之前的旧子节点，如果是首次渲染，则为 `null`。
+- `n2: VNode`：表示要更新的新子节点。
+- `container: RendererElement`：表示子节点所在的容器元素。
+- `anchor: RendererNode | null`：表示插入子节点的参考节点，新的子节点将插入到参考节点之前。如果没有指定参考节点，则为 `null`。
+- `parentComponent: ComponentInternalInstance | null`：表示当前组件实例的父级组件实例，如果没有父级组件，则为 `null`。
+- `parentSuspense: SuspenseBoundary | null`：表示当前悬挂区域（Suspense）的边界，如果没有悬挂区域，则为 `null`。
+- `isSVG: boolean`：表示是否在 SVG 上下文中进行渲染，如果是，则为 `true`，否则为 `false`。
+- `slotScopeIds: string[] | null`：表示插槽的作用域 ID 数组，用于处理作用域插槽。
+- `optimized: boolean`：表示是否进行优化的标志，如果为 `true`，则表示子节点是经过优化的。
+
+`PatchChildrenFn` 函数负责根据新的子节点更新已有的子节点，并将其插入到指定的容器中。具体的更新和插入逻辑将根据渲染器的实现而有所不同。
+ */
 type PatchChildrenFn = (
   n1: VNode | null,
   n2: VNode,
@@ -197,7 +318,19 @@ type PatchChildrenFn = (
   slotScopeIds: string[] | null,
   optimized: boolean
 ) => void
+/**
+ * `PatchBlockChildrenFn` 是一个函数类型，用于在渲染器中更新块（Block）的子节点。块是由条件渲染或懒加载等操作生成的一组子节点。该函数接受多个参数，具体如下：
 
+- `oldChildren: VNode[]`：表示之前的旧子节点数组。
+- `newChildren: VNode[]`：表示要更新的新子节点数组。
+- `fallbackContainer: RendererElement`：表示在块加载过程中使用的回退容器元素。
+- `parentComponent: ComponentInternalInstance | null`：表示当前组件实例的父级组件实例，如果没有父级组件，则为 `null`。
+- `parentSuspense: SuspenseBoundary | null`：表示当前悬挂区域（Suspense）的边界，如果没有悬挂区域，则为 `null`。
+- `isSVG: boolean`：表示是否在 SVG 上下文中进行渲染，如果是，则为 `true`，否则为 `false`。
+- `slotScopeIds: string[] | null`：表示插槽的作用域 ID 数组，用于处理作用域插槽。
+
+`PatchBlockChildrenFn` 函数负责根据新的子节点数组更新已有的子节点数组，并将其插入到指定的容器中。块的更新逻辑通常涉及到条件渲染、懒加载以及加载状态的管理。具体的更新和插入逻辑将根据渲染器的实现而有所不同。
+ */
 type PatchBlockChildrenFn = (
   oldChildren: VNode[],
   newChildren: VNode[],
@@ -207,7 +340,20 @@ type PatchBlockChildrenFn = (
   isSVG: boolean,
   slotScopeIds: string[] | null
 ) => void
+/**
+ * `MoveFn` 是一个函数类型，用于在渲染器中移动 VNode（虚拟节点）到指定位置。该函数接受多个参数，具体如下：
 
+- `vnode: VNode`：表示要移动的虚拟节点。
+- `container: RendererElement`：表示要移动到的容器元素。
+- `anchor: RendererNode | null`：表示移动的目标位置，即参考节点。如果为 `null`，则表示在容器的末尾插入。
+- `type: MoveType`：表示移动的类型，可以是以下几种值之一：
+  - `"REORDER"`：重新排序节点。移动节点的位置在其兄弟节点之间。
+  - `"INSERT"`：插入节点。将节点插入到指定位置。
+  - `"REMOVE"`：移除节点。从当前位置移除节点。
+- `parentSuspense?: SuspenseBoundary | null`：可选参数，表示父级悬挂区域（Suspense）的边界。如果没有父级悬挂区域，则为 `null`。
+
+`MoveFn` 函数用于在渲染器中执行 VNode 的移动操作，可以将 VNode 从一个位置移动到另一个位置，或者重新排序节点的位置。具体的移动操作逻辑将根据渲染器的实现而有所不同。
+ */
 type MoveFn = (
   vnode: VNode,
   container: RendererElement,
@@ -215,9 +361,27 @@ type MoveFn = (
   type: MoveType,
   parentSuspense?: SuspenseBoundary | null
 ) => void
+/**
+ * `NextFn` 是一个函数类型，用于获取虚拟节点（`VNode`）的下一个渲染节点（`RendererNode`）。该函数接受一个参数：
 
+- `vnode: VNode`：表示要获取下一个渲染节点的虚拟节点。
+
+函数返回值为 `RendererNode` 或 `null`，表示虚拟节点的下一个渲染节点，如果不存在下一个节点，则返回 `null`。
+
+`NextFn` 函数用于在渲染器中获取虚拟节点的下一个渲染节点，以便在操作 DOM 树时确定正确的位置。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 type NextFn = (vnode: VNode) => RendererNode | null
+/**
+ * `UnmountFn` 是一个函数类型，用于卸载虚拟节点（`VNode`）。该函数接受以下参数：
 
+- `vnode: VNode`：表示要卸载的虚拟节点。
+- `parentComponent: ComponentInternalInstance | null`：表示虚拟节点的父组件实例，如果不存在父组件，则为 `null`。
+- `parentSuspense: SuspenseBoundary | null`：表示虚拟节点所在的悬停边界（Suspense boundary），如果不存在悬停边界，则为 `null`。
+- `doRemove?: boolean`：可选参数，指示是否执行移除操作，默认为 `true`。
+- `optimized?: boolean`：可选参数，指示是否进行优化，默认为 `false`。
+
+`UnmountFn` 函数用于在渲染器中卸载虚拟节点及其相关内容，包括从父节点中移除、销毁组件实例、处理悬停边界等。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 type UnmountFn = (
   vnode: VNode,
   parentComponent: ComponentInternalInstance | null,
@@ -225,9 +389,26 @@ type UnmountFn = (
   doRemove?: boolean,
   optimized?: boolean
 ) => void
+/**
+ * `RemoveFn` 是一个函数类型，用于移除虚拟节点（`VNode`）。该函数接受以下参数：
 
+- `vnode: VNode`：表示要移除的虚拟节点。
+
+`RemoveFn` 函数用于从父节点中移除虚拟节点，但不涉及销毁组件实例或处理悬停边界。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 type RemoveFn = (vnode: VNode) => void
+/**
+ * `UnmountChildrenFn` 是一个函数类型，用于卸载子节点数组（`VNode[]`）。该函数接受以下参数：
 
+- `children: VNode[]`：表示要卸载的子节点数组。
+- `parentComponent: ComponentInternalInstance | null`：表示父组件的内部实例。
+- `parentSuspense: SuspenseBoundary | null`：表示父悬停边界。
+- `doRemove?: boolean`：一个可选的布尔值，表示是否执行实际的移除操作。如果为 `true`，则会从 DOM 中移除子节点；如果为 `false` 或未提供，则只会执行卸载相关的逻辑，而不会从 DOM 中移除节点。
+- `optimized?: boolean`：一个可选的布尔值，表示是否启用优化。如果为 `true`，则会使用优化的卸载算法；如果为 `false` 或未提供，则使用普通的卸载算法。
+- `start?: number`：一个可选的数字，表示要卸载的子节点的起始索引。如果提供了该参数，则只会卸载起始索引及之后的子节点。
+
+`UnmountChildrenFn` 函数用于卸载一组子节点，包括执行卸载相关的逻辑和从 DOM 中移除节点（根据 `doRemove` 参数）。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 type UnmountChildrenFn = (
   children: VNode[],
   parentComponent: ComponentInternalInstance | null,
@@ -236,7 +417,19 @@ type UnmountChildrenFn = (
   optimized?: boolean,
   start?: number
 ) => void
+/**
+ * `MountComponentFn` 是一个函数类型，用于挂载组件。该函数接受以下参数：
 
+- `initialVNode: VNode`：表示要挂载的组件的初始虚拟节点。
+- `container: RendererElement`：表示要将组件挂载到的容器元素。
+- `anchor: RendererNode | null`：表示挂载的锚点节点，即组件将插入到该节点之前。
+- `parentComponent: ComponentInternalInstance | null`：表示父组件的内部实例。
+- `parentSuspense: SuspenseBoundary | null`：表示父悬停边界。
+- `isSVG: boolean`：一个布尔值，表示组件是否在 SVG 环境中。
+- `optimized: boolean`：一个布尔值，表示是否启用了优化。
+
+`MountComponentFn` 函数负责执行组件的挂载过程。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。它会将组件的初始虚拟节点（`initialVNode`）渲染为真实的 DOM 节点，并将其插入到指定的容器元素中。在挂载过程中，可能会涉及到组件的生命周期钩子函数的调用、依赖追踪、异步更新等操作。
+ */
 export type MountComponentFn = (
   initialVNode: VNode,
   container: RendererElement,
@@ -246,14 +439,35 @@ export type MountComponentFn = (
   isSVG: boolean,
   optimized: boolean
 ) => void
+/**
+ * `ProcessTextOrCommentFn` 是一个函数类型，用于处理文本节点或注释节点。该函数接受以下参数：
 
+- `n1: VNode | null`：表示之前的虚拟节点，如果是首次处理，则为 `null`。
+- `n2: VNode`：表示当前的虚拟节点，即要处理的文本节点或注释节点。
+- `container: RendererElement`：表示要将节点插入到的容器元素。
+- `anchor: RendererNode | null`：表示节点的插入位置，即节点将插入到该位置之前。
+
+`ProcessTextOrCommentFn` 函数负责将文本节点或注释节点渲染为真实的 DOM 节点，并将其插入到指定的容器元素中。在处理过程中，可能会涉及到节点的创建、属性设置、事件绑定等操作。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 type ProcessTextOrCommentFn = (
   n1: VNode | null,
   n2: VNode,
   container: RendererElement,
   anchor: RendererNode | null
 ) => void
+/**
+ * `SetupRenderEffectFn` 是一个函数类型，用于设置渲染效果。该函数接受以下参数：
 
+- `instance: ComponentInternalInstance`：表示组件实例。
+- `initialVNode: VNode`：表示初始的虚拟节点。
+- `container: RendererElement`：表示要将节点插入到的容器元素。
+- `anchor: RendererNode | null`：表示节点的插入位置，即节点将插入到该位置之前。
+- `parentSuspense: SuspenseBoundary | null`：表示父级悬挂点。
+- `isSVG: boolean`：表示是否为 SVG 元素。
+- `optimized: boolean`：表示是否启用优化。
+
+`SetupRenderEffectFn` 函数负责在组件实例的渲染过程中设置渲染效果。这包括创建渲染副作用、注册依赖、处理数据更新等操作。具体的实现将根据渲染器的逻辑和渲染算法而有所不同。
+ */
 export type SetupRenderEffectFn = (
   instance: ComponentInternalInstance,
   initialVNode: VNode,
@@ -263,13 +477,31 @@ export type SetupRenderEffectFn = (
   isSVG: boolean,
   optimized: boolean
 ) => void
+/**
+ * `MoveType` 是一个常量枚举，包含以下三个枚举成员：
 
+- `ENTER`：表示节点进入操作，用于表示节点的插入或出现。
+- `LEAVE`：表示节点离开操作，用于表示节点的移除或消失。
+- `REORDER`：表示节点重新排序操作，用于表示节点的重新排列。
+
+这些枚举成员可以用于标识在节点移动或动画效果中的不同操作类型。具体使用方式根据实际场景和需求而定。
+ */
 export const enum MoveType {
   ENTER,
   LEAVE,
   REORDER
 }
+/**
+ * `queuePostRenderEffect` 是一个函数常量，其根据条件选择不同的实现方式。根据提供的代码片段，可以解读如下：
 
+- 首先，代码片段中使用了 `__FEATURE_SUSPENSE__` 和 `__TEST__` 这两个条件编译变量。这些变量的具体含义和取值在代码的其他部分定义。
+- 如果 `__FEATURE_SUSPENSE__` 为真（即特性 SUSPENSE 被启用），则进入条件分支。
+  - 如果 `__TEST__` 为真，执行一个函数，该函数接受两个参数 `fn` 和 `suspense`，并调用 `queueEffectWithSuspense` 函数进行处理。
+  - 如果 `__TEST__` 为假，直接使用 `queueEffectWithSuspense` 函数进行处理。
+- 如果 `__FEATURE_SUSPENSE__` 为假（即特性 SUSPENSE 被禁用），则执行 `queuePostFlushCb` 函数进行处理。
+
+具体的函数实现和逻辑需要参考代码其他部分的定义和上下文来确定。
+ */
 export const queuePostRenderEffect = __FEATURE_SUSPENSE__
   ? __TEST__
     ? // vitest can't seem to handle eager circular dependency
@@ -292,6 +524,11 @@ export const queuePostRenderEffect = __FEATURE_SUSPENSE__
  *   ...nodeOps
  * })
  * ```
+ * 这是一个用于创建渲染器的函数 `createRenderer`。它接受一个名为 `options` 的参数，该参数的类型为 `RendererOptions<HostNode, HostElement>`。函数的返回值是一个渲染器实例。
+
+具体来说，`createRenderer` 函数会调用 `baseCreateRenderer` 函数，并将 `options` 参数传递给它。`baseCreateRenderer` 函数的作用是基于提供的选项创建并返回一个渲染器实例。
+
+函数的类型参数 `HostNode` 和 `HostElement` 可以用于指定渲染器所操作的节点和元素类型的默认类型。
  */
 export function createRenderer<
   HostNode = RendererNode,
@@ -303,6 +540,16 @@ export function createRenderer<
 // Separate API for creating hydration-enabled renderer.
 // Hydration logic is only used when calling this function, making it
 // tree-shakable.
+/**
+ * 
+ * @param options 
+ * @returns 
+ * 这是一个用于创建注水渲染器的函数 `createHydrationRenderer`。它接受一个名为 `options` 的参数，该参数的类型为 `RendererOptions<Node, Element>`。函数的返回值是一个注水渲染器实例。
+
+具体来说，`createHydrationRenderer` 函数会调用 `baseCreateRenderer` 函数，并将 `options` 参数和 `createHydrationFunctions` 函数作为参数传递给它。`baseCreateRenderer` 函数的作用是基于提供的选项和渲染函数创建并返回一个渲染器实例。
+
+注水渲染器用于在服务端渲染之后将 HTML 标记与客户端应用程序进行混合，以便进行客户端的重新激活。
+ */
 export function createHydrationRenderer(
   options: RendererOptions<Node, Element>
 ) {
@@ -310,6 +557,37 @@ export function createHydrationRenderer(
 }
 
 // overload 1: no hydration
+/**
+ * 
+ * @param options 
+ * 这段代码是一个函数`baseCreateRenderer`的定义，该函数用于创建一个渲染器（renderer）对象。
+
+函数接受一个`options`参数，其中`options`是一个`RendererOptions`类型的对象，用于配置渲染器的行为。`RendererOptions`定义了一系列选项，包括渲染函数、DOM操作函数、属性操作函数等。
+
+函数还可以接受一个可选的`createHydrationFns`参数，用于创建与服务端渲染（hydration）相关的函数。在服务端渲染中，需要将服务端生成的静态标记与客户端的动态标记进行匹配，以便快速恢复客户端的交互能力。
+
+函数返回一个渲染器对象，该对象可以用于执行渲染操作，如创建和更新虚拟DOM，以及将虚拟DOM渲染到实际的DOM容器中。
+
+这段代码使用了函数重载（overload）的方式，根据参数的不同形式提供了两种不同的函数签名。第一种函数签名用于创建普通的渲染器对象，而第二种函数签名用于创建服务端渲染（hydration）相关的渲染器对象。
+
+总体而言，这段代码是用于创建渲染器对象的基础函数，通过传入不同的选项和参数，可以创建不同类型的渲染器对象用于不同的渲染场景。
+这段代码是Vue框架中的虚拟DOM的补丁过程，用于更新DOM树以匹配新的虚拟DOM。以下是代码的主要步骤：
+
+1. 检查编译时的特性标志，根据标志执行相应的初始化操作。
+2. 获取全局对象，并将`__VUE__`属性设置为`true`，同时根据开发环境或者是否启用生产环境调试工具，设置开发工具的钩子函数。
+3. 解构获取各种DOM操作的函数，如插入节点、移除节点、设置属性等。
+4. 定义补丁函数`patch`，用于更新两个虚拟DOM节点之间的差异。
+5. 在补丁函数中，首先判断新旧节点是否相同，如果相同则直接返回，否则需要卸载旧节点。
+6. 处理不同类型的节点，包括文本节点、注释节点、静态节点、片段节点、元素节点和组件节点等。
+7. 对于文本节点和注释节点，进行创建或更新操作。
+8. 对于静态节点，如果是首次挂载则进行挂载操作，如果是更新则进行更新操作。
+9. 对于片段节点，处理片段中的子节点。
+10. 对于元素节点和组件节点，进行创建或更新操作。
+11. 处理节点的引用（ref）。
+12. 最后执行各种钩子函数，如`onVnodeBeforeMount`、`onVnodeMounted`、`beforeUpdate`等。
+
+这段代码主要通过比较新旧虚拟DOM节点的类型和属性来更新DOM树，确保DOM树与最新的虚拟DOM保持一致。它处理了不同类型的节点，并执行相应的操作来插入、更新或移除节点。 1179
+ */
 function baseCreateRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
