@@ -15,6 +15,34 @@ import { getConstantType } from './hoistStatic'
 
 // Merge adjacent text nodes and expressions into a single expression
 // e.g. <div>abc {{ d }} {{ e }}</div> should have a single expression node as child.
+/**
+ * 
+ * @param node 
+ * @param context 
+ * @returns 
+ * `transformText` 是一个节点转换函数，用于在特定类型的节点上执行文本转换操作。
+
+该函数接受两个参数：
+- `node: TemplateChildNode`：要进行转换的节点。
+- `context: TransformContext`：转换上下文对象，包含有关转换环境的信息。
+
+函数内部通过判断节点的类型，包括 `ROOT`、`ELEMENT`、`FOR` 和 `IF_BRANCH`，来确定是否需要进行文本转换操作。如果节点类型符合条件，将在节点退出时执行具体的转换操作。
+
+转换操作包括以下步骤：
+1. 遍历节点的子节点列表。
+2. 判断子节点是否为文本节点，如果是，则将 `hasText` 标志设置为 `true`。
+3. 对于连续的文本节点，将它们合并为一个复合表达式节点，并移除原始的文本节点。
+4. 如果节点列表中没有文本节点，则不进行后续操作。
+5. 如果节点列表长度为 1，并且满足以下条件之一，则不进行后续操作：
+   - 节点类型为 `ROOT`。
+   - 节点类型为 `ELEMENT`，标签类型为 `ELEMENT`，且不存在自定义指令。
+   - 节点类型为 `ELEMENT`，标签为 `template`，且在兼容模式下。
+6. 针对文本节点和复合表达式节点，将它们转换为 `createTextVNode` 的调用表达式，以避免运行时的规范化处理。
+7. 如果节点是动态文本（非常量文本），则在调用表达式中添加动态文本的标记，以便在块级别进行修补。
+8. 更新节点列表中的子节点为转换后的节点。
+
+总结来说，`transformText` 函数用于在特定类型的节点上执行文本转换操作。它会将连续的文本节点合并为一个复合表达式节点，并将文本节点和复合表达式节点转换为 `createTextVNode` 的调用表达式，以优化运行时性能。
+ */
 export const transformText: NodeTransform = (node, context) => {
   if (
     node.type === NodeTypes.ROOT ||

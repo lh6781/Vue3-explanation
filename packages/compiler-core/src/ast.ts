@@ -19,8 +19,19 @@ import { ImportItem, TransformContext } from './transform'
 // Vue template is a platform-agnostic superset of HTML (syntax only).
 // More namespaces like SVG and MathML are declared by platform specific
 // compilers.
-export type Namespace = number
+/**
+ * `Namespace` 是一个类型别名，表示命名空间的类型，它是一个数字类型。
 
+在这个上下文中，`Namespace` 可能用于表示命名空间的标识或索引。具体的含义和用法可能会依赖于具体的代码实现。
+ */
+export type Namespace = number
+/**
+ * `Namespaces` 是一个枚举类型，其中包含一个枚举常量 `HTML`。枚举常量表示不同的命名空间。
+
+在这个特定的枚举中，`HTML` 常量表示 HTML 命名空间。命名空间是用于区分不同类型的 XML 元素或属性的逻辑容器。在处理 XML 或 HTML 文档时，命名空间可用于确定元素或属性的含义和语义。
+
+枚举常量可通过 `Namespaces.HTML` 进行访问。例如，可以使用 `Namespaces.HTML` 来表示 HTML 命名空间。
+ */
 export const enum Namespaces {
   HTML
 }

@@ -42,6 +42,33 @@ export const IS_MEMO_SAME = Symbol(__DEV__ ? `isMemoSame` : ``)
 
 // Name mapping for runtime helpers that need to be imported from 'vue' in
 // generated code. Make sure these are correctly exported in the runtime!
+/**
+ * `helperNameMap` 是一个导出的常量，它是一个由符号（symbol）作为键和字符串作为值的记录（Record）。该记录用于将符号映射到相应的助手函数名称。
+
+助手函数在编译过程中用于生成特定的代码片段或执行特定的操作。每个助手函数都有一个唯一的符号作为标识，而对应的字符串值则是该助手函数的名称。
+
+以下是 `helperNameMap` 中一些常见助手函数及其对应的名称：
+
+- `FRAGMENT`: `Fragment`，用于创建片段（Fragment）。
+- `TELEPORT`: `Teleport`，用于传送（Teleport）组件。
+- `SUSPENSE`: `Suspense`，用于悬挂（Suspense）组件。
+- `KEEP_ALIVE`: `KeepAlive`，用于缓存（KeepAlive）组件。
+- `CREATE_VNODE`: `createVNode`，用于创建虚拟节点（VNode）。
+- `CREATE_ELEMENT_VNODE`: `createElementVNode`，用于创建元素节点的虚拟节点。
+- `CREATE_COMMENT`: `createCommentVNode`，用于创建注释节点的虚拟节点。
+- `CREATE_TEXT`: `createTextVNode`，用于创建文本节点的虚拟节点。
+- `RENDER_LIST`: `renderList`，用于渲染列表。
+- `RENDER_SLOT`: `renderSlot`，用于渲染插槽。
+- `MERGE_PROPS`: `mergeProps`，用于合并属性。
+- `TO_DISPLAY_STRING`: `toDisplayString`，用于将值转换为显示字符串。
+- `NORMALIZE_CLASS`: `normalizeClass`，用于规范化类名。
+- `NORMALIZE_STYLE`: `normalizeStyle`，用于规范化样式。
+- `UNREF`: `unref`，用于获取响应式数据的非响应式副本。
+- `IS_REF`: `isRef`，用于检查一个值是否为响应式引用。
+- 等等。
+
+通过使用 `helperNameMap`，可以根据给定的符号查找相应的助手函数名称，以便在编译过程中使用正确的助手函数。
+ */
 export const helperNameMap: Record<symbol, string> = {
   [FRAGMENT]: `Fragment`,
   [TELEPORT]: `Teleport`,
@@ -83,7 +110,17 @@ export const helperNameMap: Record<symbol, string> = {
   [WITH_MEMO]: `withMemo`,
   [IS_MEMO_SAME]: `isMemoSame`
 }
+/**
+ * 
+ * @param helpers 
+ * `registerRuntimeHelpers` 是一个导出的函数，用于注册运行时助手函数。
 
+该函数接受一个包含符号和字符串键值对的对象 `helpers`，其中符号作为键，字符串作为值，表示要注册的助手函数及其对应的名称。
+
+函数内部通过使用 `Object.getOwnPropertySymbols` 获取 `helpers` 对象中的符号键，然后遍历每个符号键，将其对应的值赋给 `helperNameMap` 中相应的键。这样就更新了 `helperNameMap` 中的助手函数名称，以便后续在编译过程中使用正确的助手函数名称。
+
+通过调用 `registerRuntimeHelpers`，可以将自定义的运行时助手函数注册到 `helperNameMap` 中，以便在编译过程中使用这些助手函数。
+ */
 export function registerRuntimeHelpers(helpers: Record<symbol, string>) {
   Object.getOwnPropertySymbols(helpers).forEach(s => {
     helperNameMap[s] = helpers[s]

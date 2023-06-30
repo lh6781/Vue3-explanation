@@ -1,26 +1,79 @@
 import { SourceLocation } from './ast'
+/**
+ * 这是一个名为 `CompilerError` 的接口，用于表示编译器的错误信息。
 
+该接口继承了 `SyntaxError` 接口，并添加了以下属性：
+
+- `code: number | string`：表示错误的代码。可以是一个数字或字符串类型的错误代码，用于标识不同的错误类型。
+- `loc?: SourceLocation`：表示错误发生的位置信息。是一个可选的属性，包含错误所在的源代码位置。
+
+通过使用 `CompilerError` 接口，可以在编译过程中捕获和处理编译器产生的错误，并获取错误的代码和位置信息进行相关处理。
+ */
 export interface CompilerError extends SyntaxError {
   code: number | string
   loc?: SourceLocation
 }
+/**
+ * 这是一个名为 `CoreCompilerError` 的接口，它是 `CompilerError` 接口的扩展，用于表示核心编译器的错误信息。
 
+该接口添加了一个属性：
+
+- `code: ErrorCodes`：表示错误的代码，它是一个枚举类型 `ErrorCodes` 的值，用于标识不同的错误类型。
+
+通过使用 `CoreCompilerError` 接口，可以更具体地标识核心编译器产生的错误，并使用预定义的错误代码进行错误处理和识别。
+ */
 export interface CoreCompilerError extends CompilerError {
   code: ErrorCodes
 }
+/**
+ * 
+ * @param error 
+ * `defaultOnError` 是一个函数，用于处理编译器错误。它接受一个 `CompilerError` 对象作为参数，并抛出该错误。
 
+当编译器遇到错误时，如果没有提供自定义的错误处理函数，将会调用 `defaultOnError` 函数来处理错误。该函数简单地将错误对象抛出，以便在调用编译器的代码中捕获并进行适当的处理。
+
+你可以根据自己的需求定义和使用自定义的错误处理函数，以便在编译器出现错误时采取特定的行为或提供自定义的错误处理逻辑。
+ */
 export function defaultOnError(error: CompilerError) {
   throw error
 }
+/**
+ * 
+ * @param msg 
+ * `defaultOnWarn` 是一个函数，用于处理编译器的警告信息。它接受一个 `CompilerError` 对象作为参数，并在开发环境下通过 `console.warn` 输出警告信息。
 
+当编译器遇到警告时，如果没有提供自定义的警告处理函数，将会调用 `defaultOnWarn` 函数来处理警告。该函数会将警告信息打印到控制台，以便开发者可以及时注意和处理这些警告信息。
+
+请注意，`defaultOnWarn` 函数仅在开发环境下才会执行，并且需要确保全局变量 `__DEV__` 的值为 `true`。如果在生产环境中使用编译器，建议提供自定义的警告处理函数，并根据实际需求进行适当的处理和记录。
+ */
 export function defaultOnWarn(msg: CompilerError) {
   __DEV__ && console.warn(`[Vue warn] ${msg.message}`)
 }
+/**
+ * `InferCompilerError<T>` 是一个条件类型。它接受一个类型参数 `T`，如果 `T` 是 `ErrorCodes` 类型，则返回 `CoreCompilerError` 类型；否则返回 `CompilerError` 类型。
 
+这个类型可以用来推断编译器错误的类型。如果 `T` 是 `ErrorCodes`，意味着它是一个已定义的错误代码，因此返回 `CoreCompilerError` 类型，其中 `code` 属性被限定为 `ErrorCodes` 类型。否则，返回的类型是一般的 `CompilerError`，其中 `code` 属性可以是数字或字符串类型。
+
+这个类型可以用于编译器相关的函数或方法中，以根据错误代码的类型提供更具体的错误处理或错误信息。
+ */
 type InferCompilerError<T> = T extends ErrorCodes
   ? CoreCompilerError
   : CompilerError
+/**
+ * 
+ * @param code 
+ * @param loc 
+ * @param messages 
+ * @param additionalMessage 
+ * @returns 
+ * `createCompilerError` 是一个泛型函数，用于创建编译器错误。它接受一个 `code` 参数，表示错误代码，类型为 `T`，并可选地接受 `loc`、`messages` 和 `additionalMessage` 参数。
 
+函数根据当前环境和错误代码获取相应的错误消息，创建一个新的 `SyntaxError` 对象，并将其断言为 `InferCompilerError<T>` 类型，然后将错误代码和位置信息赋值给错误对象的 `code` 和 `loc` 属性，最后返回错误对象。
+
+在开发环境或非浏览器环境下，函数会根据错误代码从 `messages` 或 `errorMessages` 中获取相应的错误消息，并可以附加额外的错误信息。在生产环境且是浏览器环境下，函数直接将错误代码作为错误消息。
+
+`InferCompilerError<T>` 用于根据错误代码的类型推断错误对象的具体类型，如果 `T` 是已定义的错误代码类型 `ErrorCodes`，则返回 `CoreCompilerError` 类型；否则返回一般的 `CompilerError` 类型。这样可以确保在使用 `createCompilerError` 函数时，根据错误代码的类型提供更具体的错误对象类型，以便进行更精确的错误处理或错误信息的访问。
+ */
 export function createCompilerError<T extends number>(
   code: T,
   loc?: SourceLocation,
@@ -36,7 +89,17 @@ export function createCompilerError<T extends number>(
   error.loc = loc
   return error
 }
+/**
+ * `ErrorCodes` 是一个包含各种错误代码的枚举常量。它定义了在编译过程中可能出现的各种错误情况，以便进行错误识别和处理。
 
+这些错误代码包括了解析错误（parse errors）、Vue 特定的解析错误（Vue-specific parse errors）、转换错误（transform errors）、通用错误（generic errors）以及废弃警告（deprecations）等。
+
+每个错误代码都对应一个唯一的枚举值，例如 `ABRUPT_CLOSING_OF_EMPTY_COMMENT`、`CDATA_IN_HTML_CONTENT`、`DUPLICATE_ATTRIBUTE` 等。枚举值采用大写字母和下划线的命名方式。
+
+在枚举中还有一个特殊的值 `__EXTEND_POINT__`，它被用作高阶编译器的扩展点，以避免错误代码之间的冲突。
+
+通过使用这些错误代码，可以在编译过程中标识和处理不同类型的错误，提供更详细的错误信息和错误处理逻辑。
+ */
 export const enum ErrorCodes {
   // parse errors
   ABRUPT_CLOSING_OF_EMPTY_COMMENT,
@@ -106,7 +169,15 @@ export const enum ErrorCodes {
   // item.
   __EXTEND_POINT__
 }
+/**
+ * `errorMessages` 是一个映射表，将错误代码（`ErrorCodes`）与对应的错误消息字符串进行关联。
 
+它定义了在编译过程中可能出现的各种错误情况的错误消息，以便提供更具体和有意义的错误信息。每个错误代码都对应一个错误消息字符串。
+
+例如，对于错误代码 `ErrorCodes.ABRUPT_CLOSING_OF_EMPTY_COMMENT`，对应的错误消息字符串是 `'Illegal comment.'`。而对于错误代码 `ErrorCodes.CDATA_IN_HTML_CONTENT`，对应的错误消息字符串是 `'CDATA section is allowed only in XML context.'`。
+
+使用这个映射表，可以根据错误代码快速获取相应的错误消息，从而向开发人员提供准确的错误描述，帮助他们理解和解决编译过程中的问题。
+ */
 export const errorMessages: Record<ErrorCodes, string> = {
   // parse errors
   [ErrorCodes.ABRUPT_CLOSING_OF_EMPTY_COMMENT]: 'Illegal comment.',
