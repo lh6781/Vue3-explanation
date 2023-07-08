@@ -7,7 +7,29 @@ import { rewriteDefaultAST } from '../rewriteDefault'
 import { genNormalScriptCssVarsCode } from '../style/cssVars'
 
 export const normalScriptDefaultVar = `__default__`
+/**
+ * 
+ * @param ctx 
+ * @param scopeId 
+ * @returns 
+ * 这是一个名为 `processNormalScript` 的函数，用于处理普通脚本块。
 
+函数的参数如下：
+- `ctx: ScriptCompileContext`：脚本编译上下文对象。
+- `scopeId: string`：作用域 ID。
+
+函数的主要逻辑如下：
+- 首先检查脚本的语言类型，如果不是 JavaScript 或 TypeScript，则直接返回脚本对象。
+- 在处理过程中，可能会修改脚本的内容和源映射。
+- 解析脚本的 AST，并分析脚本中的绑定信息。
+- 获取一些编译选项和描述符的信息，如源代码、文件名和 CSS 变量等。
+- 如果启用了响应性转换且需要转换内容，则使用 MagicString 库进行转换。
+- 如果存在 CSS 变量或需要生成默认变量的情况，使用 MagicString 库进行重写。
+- 生成用于导出 CSS 变量和默认变量的代码，并将其追加到脚本内容中。
+- 返回经过处理后的脚本对象，包括修改后的内容、映射、绑定信息和脚本的 AST。
+
+该函数用于处理普通的脚本块，进行必要的转换和重写，以满足编译的需求。
+ */
 export function processNormalScript(
   ctx: ScriptCompileContext,
   scopeId: string
